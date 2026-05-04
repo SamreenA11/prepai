@@ -75,6 +75,89 @@ def generate_questions():
         "session_id": session_id,
         "questions": questions
     })
+@app.route('/evaluate-answer', methods=['POST'])
+def evaluate_answer():
+    data = request.get_json()
+    question_id = data.get('question_id')
+    user_answer = data.get('user_answer')
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM questions WHERE id = ?', (question_id,))
+    question_row = cursor.fetchone()
+
+    if not question_row:
+        return jsonify({"error": "Question not found"}), 404
+
+    question_text = question_row['question']
+
+    prompt = f"""
+    You are a senior technical interviewer at a top tech company.
+    
+    Interview Question: {question_text}
+    
+    Candidate's Answer: {user_answer}
+    
+    Evaluate this answer and respond with ONLY a JSON object like this:
+    {{
+        "score": <number from 1 to 10>,
+        "feedback": "<2-3 sentences of specific feedback>",
+        "what_was_good": "<what the candidate did well>",
+        "what_to_improve": "<specific thing to improve>"
+    }}
+    
+    Be honest but constructive. No extra text, just the JSON.
+    """
+
+    response = client.models.generate_content(
+        model='models/gemini-2.5-flash',
+        contents=prompt
+    )
+
+    raw = response.text.strip()
+    if raw.startswith('```'):
+        raw = raw.split('\n', 1)[1]
+        raw = raw.rsplit('```', 1)[0]
+    evaluation = json.loads(raw.strip())
+
+    cursor.execute('''
+        UPDATE questions 
+        SET user_answer = ?, ai_feedback = ?, score = ?
+        WHERE id = ?
+    ''', (user_answer, evaluation['feedback'], evaluation['score'], question_id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify(evaluation)
+
+@app.route('/get-sessions', methods=['GET'])
+def get_sessions():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT s.id, s.job_role, s.created_at,
+               COUNT(q.id) as total_questions,
+               AVG(q.score) as avg_score
+        FROM sessions s
+        LEFT JOIN questions q ON s.id = q.session_id
+        GROUP BY s.id
+        ORDER BY s.created_at DESC
+    ''')
+    sessions = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(sessions)
+
+@app.route('/get-session/<int:session_id>', methods=['GET'])
+def get_session(session_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM sessions WHERE id = ?', (session_id,))
+    session = dict(cursor.fetchone())
+    cursor.execute('SELECT * FROM questions WHERE session_id = ?', (session_id,))
+    questions = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify({"session": session, "questions": questions})
 
 if __name__ == '__main__':
     from database import init_db
