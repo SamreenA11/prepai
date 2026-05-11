@@ -30,16 +30,16 @@ def generate_questions():
 
     prompt = f"""
     You are a senior technical interviewer at a top tech company.
-
+    
     Job Role: {job_role}
     Job Description: {job_description}
-
-    Generate exactly 5 technical interview questions  for this role.
+    
+    Generate exactly 5 technical interview questions for this role.
     Make them specific, challenging, and relevant to the job description.
-
+    
     Return ONLY a JSON array like this:
     ["question 1", "question 2", "question 3", "question 4", "question 5"]
-
+    
     No extra text. Just the JSON array.
     """
 
@@ -47,8 +47,8 @@ def generate_questions():
         model='models/gemini-2.5-flash',
         contents=prompt
     )
+
     raw = response.text.strip()
-    # Remove markdown code blocks if Gemini adds them
     if raw.startswith('```'):
         raw = raw.split('\n', 1)[1]
         raw = raw.rsplit('```', 1)[0]
@@ -59,7 +59,7 @@ def generate_questions():
     cursor.execute(
         'INSERT INTO sessions (job_role, job_description) VALUES (?, ?)',
         (job_role, job_description)
-    ) 
+    )
     session_id = cursor.lastrowid
 
     for question in questions:
@@ -68,13 +68,21 @@ def generate_questions():
             (session_id, question)
         )
 
+    cursor.execute(
+        'SELECT id FROM questions WHERE session_id = ? ORDER BY id',
+        (session_id,)
+    )
+    question_ids = [row['id'] for row in cursor.fetchall()]
+
     conn.commit()
     conn.close()
 
     return jsonify({
         "session_id": session_id,
-        "questions": questions
+        "questions": questions,
+        "question_ids": question_ids
     })
+
 @app.route('/evaluate-answer', methods=['POST'])
 def evaluate_answer():
     data = request.get_json()
@@ -163,4 +171,3 @@ if __name__ == '__main__':
     from database import init_db
     init_db()
     app.run(debug=True, port=5000)
-
