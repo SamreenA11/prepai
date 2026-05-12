@@ -53,7 +53,6 @@ Every session is saved so users can track progress over time.
 - **Python Flask** — REST API backend
 - **SQLite** — lightweight relational database
 - **Google Gemini 2.5 Flash API** — AI question generation and evaluation
-- **Gunicorn** — production WSGI server
 - **Render** — backend deployment
 
 ---
