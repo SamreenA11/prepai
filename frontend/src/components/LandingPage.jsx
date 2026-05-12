@@ -1,7 +1,7 @@
 function LandingPage({ onGetStarted }) {
 
   const MockCard = () => (
-    <div style={{
+    <div className="mock-card-graphic" style={{
       position: 'absolute',
       right: '60px',
       top: '50%',
