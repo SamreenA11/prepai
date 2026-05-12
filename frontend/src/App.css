@@ -871,3 +871,121 @@ html, body, #root {
   color: var(--t3);
   gap: 20px;
 }
+
+/* ─── MOBILE RESPONSIVE ───────────────────────── */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 20px;
+  }
+
+  .nav-links a { display: none; }
+
+  .hero {
+    padding: 100px 20px 60px;
+    padding-right: 20px !important;
+  }
+
+  .hero-title {
+    font-size: 2.8rem;
+  }
+
+  .hero-metrics {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .metric {
+    padding: 14px 20px;
+    flex: 1;
+    min-width: 40%;
+  }
+
+  .metric:nth-child(2) { border-right: none; }
+  .metric:nth-child(3) { border-top: 1px solid var(--b); }
+  .metric:nth-child(4) { border-top: 1px solid var(--b); border-right: none; }
+
+  .proof-bar {
+    padding: 12px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .proof-label {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid var(--b);
+    padding-bottom: 10px;
+    width: 100%;
+  }
+
+  .proof-companies {
+    gap: 16px;
+  }
+
+  .features {
+    padding: 60px 20px;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .feature-card {
+    border-right: none;
+    border-bottom: 1px solid var(--b);
+  }
+
+  .feature-card:nth-child(1),
+  .feature-card:nth-child(3) {
+    border-right: 1px solid var(--b);
+  }
+
+  .feature-card:nth-child(3),
+  .feature-card:nth-child(4) {
+    border-bottom: none;
+  }
+
+  .how {
+    padding: 60px 20px;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .step-arrow { display: none; }
+
+  .cta {
+    padding: 80px 20px;
+  }
+
+  .cta h2 { font-size: 2.5rem; }
+
+  .footer-top {
+    padding: 40px 20px 32px;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .footer-brand { max-width: 100%; }
+
+  .footer-links { gap: 32px; }
+
+  .footer-bottom {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+
+  /* Hide mock card on mobile */
+  .hero > div:last-of-type {
+    display: none;
+  }
+}
